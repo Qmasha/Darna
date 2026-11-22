@@ -1,0 +1,106 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Darna - Intelligent Property Care</title>
+<style>
+:root{--bg:#eff0f2;--card:#fff;--ink:#1c1c1c;--mute:#7a7a7a;--mint:#c9f4e4;--line:#e6e7ea}
+*{box-sizing:border-box}body{margin:0;font-family:"Segoe UI",Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg);display:grid;grid-template-columns:200px 1fr;min-height:100vh}
+aside{background:#fff;padding:1.4rem 1.3rem;border-right:1px solid var(--line)}
+aside h1{margin:0;font-size:1.7rem}aside small{color:var(--mute);font-size:.72rem;display:block;margin-bottom:2.2rem}
+aside a,aside button.nav{display:block;width:100%;text-align:left;background:none;border:0;padding:0;margin:0 0 1.6rem;font:600 1rem inherit;font-family:inherit;color:var(--ink);cursor:pointer;text-decoration:none}
+aside .on{color:#0e9f7a}aside .me{position:absolute;bottom:1.2rem;font-size:.75rem;color:var(--mute)}
+main{padding:1.4rem 2rem 3rem;min-width:0}
+.top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;margin-bottom:1.6rem}
+.top h2{margin:0;font-size:1.8rem}.top small{color:var(--mute)}
+.chips{display:flex;gap:.7rem;flex-wrap:wrap}.chip{background:#fff;border:0;border-radius:99px;padding:.7rem 1.4rem;font:inherit;font-size:.85rem;cursor:pointer}.chip.on{background:var(--mint)}
+h3{font-size:1.05rem;margin:1.6rem 0 .9rem}
+.hero{width:100%;max-width:720px;height:380px;object-fit:cover;border-radius:22px;display:block}
+.view{display:none}.view.on{display:block}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;max-width:720px}
+.card{background:var(--card);border-radius:18px;padding:1.1rem 1.3rem;overflow-x:auto;margin-bottom:1rem}
+.stat b{font-size:2rem;display:block}.stat span{color:var(--mute);font-size:.85rem}
+.band{background:#fff;margin:2.2rem -2rem 0;padding:1.6rem 2rem}.band .sub{font-size:1.5rem;font-weight:300}.band .big{font-size:1.5rem;font-weight:700;margin-bottom:.5rem}
+.members{display:flex;gap:1rem;flex-wrap:wrap}.av{display:flex;align-items:center;gap:.6rem;background:var(--bg);border-radius:99px;padding:.4rem 1rem .4rem .4rem}
+.av i{width:34px;height:34px;border-radius:50%;background:var(--mint);display:grid;place-items:center;font-style:normal;font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:.9rem}th{color:var(--mute);font-weight:500}th,td{text-align:left;padding:.55rem .4rem;border-bottom:1px solid var(--line)}
+.pill{padding:.12rem .6rem;border-radius:99px;font-size:.78rem;background:#eee}
+.Critical,.High,.Suspicious{background:#fdd}.Medium,.Unknown{background:#fdf0b8}.Low,.Trusted,.Resolved{background:var(--mint)}
+button.sm{padding:.3rem .8rem;border:0;border-radius:99px;background:#1c1c1c;color:#fff;cursor:pointer;font-size:.8rem}
+input{padding:.5rem .8rem;border:1px solid var(--line);border-radius:99px;font:inherit;font-size:.85rem;margin:.2rem 0}
+.hint{color:var(--mute);font-size:.8rem;margin-left:.5rem}
+@media(max-width:760px){body{grid-template-columns:1fr}aside{border:0;display:flex;gap:1.2rem;flex-wrap:wrap;align-items:center}aside small{display:none}aside h1{margin-right:1rem}aside a,aside button.nav{width:auto;margin:0}aside .me{display:none}main{padding:1rem}.band{margin:1.6rem -1rem 0;padding:1.2rem 1rem}.hero{height:260px}}
+</style></head><body>
+<aside><h1>Darna</h1><small>Intelligent Property Care</small>
+<button class="nav on" data-v="home">Home</button><button class="nav" data-v="cameras">Cameras</button><button class="nav" data-v="locks">Smart Locks</button>
+<button class="nav" data-v="network" id="nav-network">Network</button><button class="nav" data-v="maint">Maintenance</button>
+<a href="/facial-recognition">Facial Recognition</a><a href="/logout">Logout</a>
+<div class="me">{{ user_name }}<br>{{ role }}</div></aside>
+<main>
+<div class="top"><div><h2 id="title">Home</h2><small>Property Overview</small></div>
+ <div class="chips" id="chips"></div></div>
+
+<section class="view on" id="v-home">
+ <h3>Property Overview</h3><img class="hero" src="/static/house.jpg" alt="Property">
+ <h3>Security Overview</h3>
+ <div class="stats"><div class="card stat"><b id="s-cams">-</b><span>Cameras</span></div><div class="card stat"><b id="s-locks">-</b><span>Smart locks</span></div>
+ <div class="card stat"><b id="s-alerts">-</b><span>Open alerts</span></div><div class="card stat"><b id="s-risk">-</b><span>High-risk assets</span></div></div>
+ <div class="band"><div class="sub">Smart Home</div><div class="big">Security Systems</div>
+  <h3>Members</h3><div class="members" id="members"></div>
+  <h3>Recent Activity</h3><div class="card"><table id="acts"></table></div></div>
+</section>
+
+<section class="view" id="v-cameras"><div class="card"><table id="cams"></table>
+ {% if role == 'Property Manager' %}<p><input id="cn" placeholder="Name"> <input id="cl" placeholder="Location"> <input id="cs" placeholder="Schedule (e.g. 24/7)"> <button class="sm" onclick="addCam()">Add camera</button></p>{% endif %}</div></section>
+<section class="view" id="v-locks"><div class="card"><table id="locks"></table></div></section>
+
+<section class="view" id="v-network">
+ <div class="card"><button class="sm" onclick="scan()">Run demo scan</button><span class="hint">Real deployments POST observed devices to /api/network/scan.</span><table id="devs"></table></div>
+ <div class="card"><table id="alerts"></table></div></section>
+
+<section class="view" id="v-maint"><div class="card">
+ {% if role == 'Property Manager' %}<button class="sm" onclick="predict()">Run predictions</button>{% endif %}
+ <span class="hint">Heuristic: asset age vs lifespan, time since service, lock battery.</span><table id="preds"></table></div>
+ {% if role == 'Property Manager' %}<div class="card"><b>Add asset</b><br><input id="an" placeholder="Name"> <input id="at" placeholder="Type (Camera, HVAC...)"> <input id="al" placeholder="Location">
+  <input id="ai" type="date" title="Installed"> <input id="am" type="date" title="Last maintenance"> <input id="ae" type="number" placeholder="Lifespan (months)"> <button class="sm" onclick="addAsset()">Add</button></div>{% endif %}</section>
+</main>
+<script>
+const ROLE={{ role|tojson }}, MGR=ROLE==='Property Manager', STAFF=MGR||ROLE==='Security Staff';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pill=v=>`<span class="pill ${esc(v)}">${esc(v)}</span>`;
+const api=async(u,m='GET',b)=>{const r=await fetch(u,{method:m,headers:{'Content-Type':'application/json'},body:b?JSON.stringify(b):undefined});
+ const j=await r.json().catch(()=>({}));if(!r.ok)alert(j.error||'Request failed');return r.ok?j:null};
+const tbl=(id,head,rows)=>$(id).innerHTML='<tr>'+head.map(h=>`<th>${h}</th>`).join('')+'</tr>'+(rows.join('')||`<tr><td colspan=${head.length}>Nothing yet.</td></tr>`);
+if(!STAFF)$('nav-network').style.display='none';
+const TITLES={home:'Home',cameras:'Cameras',locks:'Smart Locks',network:'Network Security',maint:'Maintenance'};
+document.querySelectorAll('button.nav').forEach(b=>b.onclick=()=>{document.querySelectorAll('button.nav,.view').forEach(x=>x.classList.remove('on'));
+ b.classList.add('on');$('v-'+b.dataset.v).classList.add('on');$('title').textContent=TITLES[b.dataset.v]});
+// Area chips filter cameras/locks by location keywords (edit to match your property)
+const AREAS={'1st Floor':['entrance','living','front','kitchen'],'2nd Floor':['bedroom','upstairs','balcony'],'Garage':['garage']};
+let area=null,DATA=null;
+$('chips').innerHTML=Object.keys(AREAS).map(a=>`<button class="chip" data-a="${a}">${a}</button>`).join('');
+$('chips').onclick=e=>{const a=e.target.dataset.a;if(!a)return;area=area===a?null:a;
+ document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c.dataset.a===area));if(DATA)draw()};
+const inArea=t=>!area||AREAS[area].some(k=>String(t).toLowerCase().includes(k));
+function draw(){const d=DATA;
+ $('s-cams').textContent=d.cameras.length;$('s-locks').textContent=d.locks.length;$('s-alerts').textContent=d.open_alerts;$('s-risk').textContent=d.high_risk_assets;
+ $('members').innerHTML=d.members.map(m=>`<div class="av"><i>${esc(m.initial)}</i>${esc(m.name)}</div>`).join('')||'None yet.';
+ tbl('cams',['Name','Location','Status','Schedule',''],d.cameras.filter(c=>inArea(c.location)).map(c=>`<tr><td>${esc(c.name)}</td><td>${esc(c.location)}</td><td>${pill(c.status==='Online'?'Trusted':'High')} ${esc(c.status)}</td><td>${esc(c.schedule)}</td><td>${MGR?`<button class="sm" onclick="delCam(${c.id})">Delete</button>`:''}</td></tr>`));
+ tbl('locks',['Lock','State','Battery',''],d.locks.filter(l=>inArea(l.name)).map(l=>`<tr><td>${esc(l.name)}</td><td>${l.is_locked?'Locked':'Unlocked'}</td><td>${esc(l.battery)}%</td><td>${STAFF?`<button class="sm" onclick="tog(${l.id})">Toggle</button>`:''}</td></tr>`));
+ tbl('acts',['Event','Details','Time'],d.activities.slice(0,15).map(a=>`<tr><td>${esc(a.title)}</td><td>${esc(a.description)}</td><td>${esc(a.created_at)}</td></tr>`))}
+async function loadOverview(){DATA=await api('/api/dashboard');if(DATA)draw()}
+async function loadNetwork(){if(!STAFF)return;const [d,a]=await Promise.all([api('/api/network/devices'),api('/api/network/alerts')]);
+ if(d)tbl('devs',['Name','IP','MAC','Type','Status','Online',''],d.map(x=>`<tr><td>${esc(x.device_name)}</td><td>${esc(x.ip_address)}</td><td>${esc(x.mac_address)}</td><td>${esc(x.device_type)}</td><td>${pill(x.status)}</td><td>${x.online?'Yes':'No'}</td><td>${MGR&&x.status!=='Trusted'?`<button class="sm" onclick="trust(${x.id})">Trust</button>`:''}</td></tr>`));
+ if(a)tbl('alerts',['Severity','Type','Device','Details','Status','Detected',''],a.map(x=>`<tr><td>${pill(x.severity)}</td><td>${esc(x.alert_type)}</td><td>${esc(x.device_name)}</td><td>${esc(x.description)}</td><td>${esc(x.status)}</td><td>${esc(x.detected_at)}</td><td>${x.status==='Open'?`<button class="sm" onclick="resolveA(${x.id})">Resolve</button>`:''}</td></tr>`))}
+async function loadMaint(){const p=await api('/api/maintenance/predictions');
+ if(p)tbl('preds',['Asset','Type','Location','Risk','Issue','Est. failure','Confidence','Recommendation',''],p.map(x=>`<tr><td>${esc(x.asset_name)}</td><td>${esc(x.asset_type)}</td><td>${esc(x.location)}</td><td>${pill(x.risk_level)}</td><td>${esc(x.predicted_issue)}</td><td>${esc(x.predicted_failure_date)}</td><td>${Math.round(x.model_confidence*100)}%</td><td>${esc(x.recommendation)}</td><td>${MGR?`<button class="sm" onclick="serviced(${x.asset_id})">Mark serviced</button>`:''}</td></tr>`))}
+const all=()=>{loadOverview();loadNetwork();loadMaint()};
+const tog=async i=>{await api(`/api/locks/${i}/toggle`,'POST');loadOverview()};
+const addCam=async()=>{if(await api('/api/cameras','POST',{name:$('cn').value,location:$('cl').value,schedule:$('cs').value}))loadOverview()};
+const delCam=async i=>{if(confirm('Delete this camera?')&&await api('/api/cameras/'+i,'DELETE'))loadOverview()};
+const scan=async()=>{if(await api('/api/network/scan','POST',{demo:true}))all()};
+const trust=async i=>{if(await api(`/api/network/devices/${i}/trust`,'POST'))all()};
+const resolveA=async i=>{if(await api(`/api/network/alerts/${i}/resolve`,'POST'))all()};
+const predict=async()=>{if(await api('/api/maintenance/predict','POST'))all()};
+const serviced=async i=>{if(await api(`/api/maintenance/assets/${i}/serviced`,'POST')&&await api('/api/maintenance/predict','POST'))all()};
+const addAsset=async()=>{if(await api('/api/maintenance/assets','POST',{asset_name:$('an').value,asset_type:$('at').value,location:$('al').value,installation_date:$('ai').value,last_maintenance_date:$('am').value,expected_lifespan_months:$('ae').value}))predict()};
+all();
+</script></body></html>
