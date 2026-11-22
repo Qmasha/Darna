@@ -1,0 +1,6 @@
+env312/
+.venv/
+venv/
+__pycache__/
+biometric_templates/
+*.enc
